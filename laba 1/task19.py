@@ -14,8 +14,6 @@ def cache(func):
 
     return wrapper
 
-
-# Пример использования
 @cache
 def schet(a, b):
     print("Сохранение в кэщ")

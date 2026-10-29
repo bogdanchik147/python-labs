@@ -21,7 +21,6 @@ elif months <= 36:
 else:
     risksoot = soot + 10
 
-# Определение риска
 if history == "отличная" and risksoot <= 10:
     risk = "низкий"
     rate = 8
@@ -38,19 +37,15 @@ else:
     risk = "высокий"
     rate = 18
 
-# Учет поручителя
 if guarantor == "да":
     rate = rate - 1
 
-# Учет залога
 if collateral == "да":
     rate = rate - 2
 
-# Вывод результатов
 print(f"Категория риска: {risk}")
 print(f"Процентная ставка: {rate}%")
 
-# Рекомендация
 if risk == "низкий" or risk == "средний":
     print("Кредит можно одобрить")
 

@@ -16,8 +16,6 @@ def timing(func):
 
     return wrapper
 
-
-# Пример использования
 @timing
 def summa(a, b):
     return a + b
