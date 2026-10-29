@@ -35,8 +35,8 @@ def financial_assistant():
     print("\nРекомендации:")
 
     if totalincome > 0:
-        savings_rate = balance / totalincome * 100
-        print(f"Доля оставшихся средств: {savings_rate:.1f}%")
+        rate = balance / totalincome * 100
+        print(f"Доля оставшихся средств: {rate:.1f}%")
 
         if balance < 0:
             print("Расходы превышают доходы")
@@ -58,10 +58,10 @@ def financial_assistant():
     goal = input("Введите название цели: ")
     goalsum = float(input("Сколько денег нужно накопить? "))
 
-    monthly_saving = float(input("Сколько планируете откладывать в месяц? "))
+    saving = float(input("Сколько планируете откладывать в месяц? "))
 
-    if monthly_saving > 0:
-        months = goalsum / monthly_saving
+    if saving > 0:
+        months = goalsum / saving
         print(f"Цель {goal}: потребуется примерно {months:.1f} месяца.")
 
 financial_assistant()
