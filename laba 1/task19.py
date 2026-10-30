@@ -16,4 +16,4 @@ def schet(a, b):
     print("Сохранение в кэщ")
     return a * b
 print("Первый выз:", schet(5, 3))
-print("Второй вызов:", schet(4, 8))
+print("Второй вызов:", schet(4, 9))
