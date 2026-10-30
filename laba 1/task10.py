@@ -14,11 +14,11 @@ if age >= 63:
 if birthday == "да":
     discount = discount + 5
 
+if discount > 10:
+    discount = 10
+
 if vip == "да" :
     discount =  max(discount, 15)
-
-if discount > 25:
-    discount = 25
 
 finalprice = price * (100 - discount) / 100
 
