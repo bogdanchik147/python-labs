@@ -1,6 +1,14 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
+class FacultyError(Exception):
+    pass
+
+class AddToCourseError(FacultyError):
+    pass
+
+
+
 
 @dataclass
 class Discipline:
@@ -10,10 +18,36 @@ class Discipline:
     specialties: Dict[str, List[int]]
     students: Dict[str, Optional[int]] = field(default_factory=dict)
 
+    def is_available_for(self, specialty, semester):
+        return semester in self.specialties.get(specialty, [])
+
+    def add_student(self, student):
+        if not self.is_available_for(student.specialty, student.semester):
+            raise AddToCourseError(
+                f"Предмет «{self.name}» недоступен для специальности "
+                f"{student.specialty} в {student.semester}-м семестре."
+            )
+        if student.student_id in self.students:
+            raise AddToCourseError("Студент уже записан на этот предмет.")
+        self.students[student.student_id] = None
+
+
+
+
+
+
 @dataclass
 class Department:
     name: str
     disciplines: Dict[str, Discipline] = field(default_factory=dict)
+
+    def add_discipline(self, discipline):
+        self.disciplines[discipline.discipline_id] = discipline
+
+
+
+
+
 
 @dataclass
 class Student:
@@ -22,6 +56,13 @@ class Student:
     specialty: str
     semester: int = 1
     disciplines: List[str] = field(default_factory=list)
+
+
+
+
+
+
+
 
 
 @dataclass
@@ -33,5 +74,20 @@ class Faculty:
     disciplines: Dict[str, Discipline] = field(default_factory=dict)
     specialties: List[str] = field(default_factory=list)
 
-#dsffsdfsd
+    def add_department(self, department):
+        self.departments[department.name] = department
+
+    def add_discipline(self, discipline):
+        if discipline.department_name not in self.departments:
+            raise FacultyError("Сначала добавьте кафедру этой дисциплины.")
+        if discipline.discipline_id in self.disciplines:
+            raise FacultyError("Дисциплина с таким ID уже существует.")
+        self.disciplines[discipline.discipline_id] = discipline
+        self.departments[discipline.department_name].add_discipline(discipline)
+
+
+
+
+
+
 
