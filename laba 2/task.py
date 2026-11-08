@@ -13,6 +13,15 @@ class SemesterError(FacultyError):
 class StudentNotFoundError(FacultyError):
     pass
 
+class GradeError(FacultyError):
+    pass
+
+class DisciplineNotFoundError(FacultyError):
+    pass
+
+
+
+
 
 
 @dataclass
@@ -36,6 +45,12 @@ class Discipline:
             raise AddToCourseError("Студент уже записан на этот предмет")
         self.students[student.student_id] = None
 
+    def set_grade(self, student_id, grade):
+        if student_id not in self.students:
+            raise AddToCourseError("Студент не записан на этот предмет.")
+        if not isinstance(grade, int) or not 1 <= grade <= 10:
+            raise GradeError("Оценка должна быть целым числом от 1 до 10.")
+        self.students[student_id] = grade
 
 
 
@@ -107,7 +122,38 @@ class Faculty:
             raise StudentNotFoundError(f"Студент с ID {student_id} не найден.")
         return student
 
+    def add_student_to_discipline(self, student_id, discipline_id):
+        student = self.get_student(student_id)
+        discipline = self.disciplines.get(discipline_id)
+        if discipline is None:
+            raise DisciplineNotFoundError(f"Предмет с ID {discipline_id} не найден.")
+        # Иностранный язык выбирается один: английский ИЛИ немецкий.
+        language_ids = {"D03", "D04"}
+        if discipline_id in language_ids and any(
+                course_id in language_ids for course_id in student.disciplines
+        ):
+            raise AddToCourseError("Можно выбрать только один иностранный язык: английский или немецкий.")
+        discipline.add_student(student)
+        student.disciplines.append(discipline_id)
+        self.save_registry()
 
+    def remove_student_from_discipline(self, student_id, discipline_id):
+        student = self.get_student(student_id)
+        discipline = self.disciplines.get(discipline_id)
+        if discipline is None:
+            raise DisciplineNotFoundError(f"Предмет с ID {discipline_id} не найден.")
+        if discipline_id not in student.disciplines:
+            raise AddToCourseError("Студент не записан на этот предмет.")
+        discipline.students.pop(student_id, None)
+        student.disciplines.remove(discipline_id)
+        self.save_registry()
+
+    def set_student_grade(self, student_id, discipline_id, grade):
+        self.get_student(student_id)
+        discipline = self.disciplines.get(discipline_id)
+        if discipline is None:
+            raise DisciplineNotFoundError(f"Предмет с ID {discipline_id} не найден.")
+        discipline.set_grade(student_id, grade)
 
 
 
