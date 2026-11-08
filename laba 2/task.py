@@ -7,6 +7,11 @@ class FacultyError(Exception):
 class AddToCourseError(FacultyError):
     pass
 
+class SemesterError(FacultyError):
+    pass
+
+class StudentNotFoundError(FacultyError):
+    pass
 
 
 
@@ -25,10 +30,10 @@ class Discipline:
         if not self.is_available_for(student.specialty, student.semester):
             raise AddToCourseError(
                 f"Предмет «{self.name}» недоступен для специальности "
-                f"{student.specialty} в {student.semester}-м семестре."
+                f"{student.specialty} в {student.semester}-м семестре"
             )
         if student.student_id in self.students:
-            raise AddToCourseError("Студент уже записан на этот предмет.")
+            raise AddToCourseError("Студент уже записан на этот предмет")
         self.students[student.student_id] = None
 
 
@@ -85,7 +90,22 @@ class Faculty:
         self.disciplines[discipline.discipline_id] = discipline
         self.departments[discipline.department_name].add_discipline(discipline)
 
+    def addtocourse_student(self, student_id, full_name, specialty, semester=1):
+        if student_id in self.students or student_id in self.expelled_students:
+            raise FacultyError("Студент с таким ID уже существует.")
+        if specialty not in self.specialties:
+            raise FacultyError("Неизвестная специальность: " + ", ".join(self.specialties))
+        if semester < 1:
+            raise SemesterError("Номер семестра должен быть положительным.")
+        student = Student(student_id, full_name, specialty, semester)
+        self.students[student_id] = student
+        return student
 
+    def get_student(self, student_id):
+        student = self.students.get(student_id)
+        if student is None:
+            raise StudentNotFoundError(f"Студент с ID {student_id} не найден.")
+        return student
 
 
 
