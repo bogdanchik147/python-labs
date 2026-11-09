@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
-
+from statistics import mean
 
 
 
@@ -157,7 +157,7 @@ class Faculty:
     def get_student(self, student_id):
         student = self.students.get(student_id)
         if student is None:
-            raise StudentNotFoundError(f"Студент с ID {student_id} не найден.")
+            raise StudentNotFoundError(f"Студент с ID {student_id} не найден")
         return student
 
     def expel_student(self, student_id, reason="Отчислен по решению администрации"):
@@ -242,3 +242,58 @@ class Faculty:
         student.semester += 1
         self.save_registry()
 
+    def student_report(self, student_id):
+        student = self.get_student(student_id)
+        lines = [
+            f"Ведомость студента: {student.full_name}",
+            f"ID: {student.student_id}",
+            f"Факультет: {self.name}",
+            f"Специальность: {student.specialty}",
+            f"Семестр: {student.semester}",
+            "",
+            "Предметы:"
+        ]
+        grades = []
+        for discipline_id in student.disciplines:
+            discipline = self.disciplines[discipline_id]
+            grade = discipline.students.get(student_id)
+            grade_text = str(grade) if grade is not None else "не выставлена"
+            lines.append(f"{discipline.name} | кафедра: {discipline.department_name} | оценка: {grade_text}")
+            if grade is not None:
+                grades.append(grade)
+
+        lines.append(f"\nСредний балл: {mean(grades):.2f}" if grades else "\nСредний балл: нет оценок")
+        report = "\n".join(lines)
+        filename = f"vedomost_student_{student_id}.txt"
+        with open(filename, "w", encoding="utf-8") as file:
+            file.write(report)
+        return report, filename
+
+    def discipline_report(self, discipline_id):
+        discipline = self.disciplines.get(discipline_id)
+        if discipline is None:
+            raise DisciplineNotFoundError(f"Предмет с ID {discipline_id} не найден.")
+
+        completed = []
+        for student_id, grade in discipline.students.items():
+            student = self.students.get(student_id)
+            if student and grade is not None:
+                completed.append((student, grade))
+
+        grades = [grade for _, grade in completed]
+        average = f"{mean(grades):.2f}" if grades else "нет оценок"
+        lines = [
+            f"Ведомость по предмету: {discipline.name}",
+            f"Кафедра: {discipline.department_name}",
+            f"Средний балл: {average}",
+            "",
+            "Студенты с выставленными оценками:"
+        ]
+        for student, grade in completed:
+            lines.append(f"{student.student_id} | {student.full_name} | {student.specialty} | оценка: {grade}")
+
+        report = "\n".join(lines)
+        filename = f"vedomost_discipline_{discipline_id}.txt"
+        with open(filename, "w", encoding="utf-8") as file:
+            file.write(report)
+        return report, filename
