@@ -297,3 +297,42 @@ class Faculty:
         with open(filename, "w", encoding="utf-8") as file:
             file.write(report)
         return report, filename
+
+def My_faculty():
+    faculty = Faculty(
+        "Факультет информационных технологий",
+         specialties=["КБ", "ПИ", "РФ", "ИНТЭЛ"]
+    )
+
+    departments = [
+        "Кафедра программирования",
+        "Кафедра математики",
+        "Кафедра радиотехники",
+        "Кафедра иностранных языков"
+        ]
+    for name in departments:
+        faculty.add_department(Department(name))
+
+
+    all_it = ["КБ", "ПИ", "ИНТЭЛ"]
+    all_specialties = ["КБ", "ПИ", "РФ", "ИНТЭЛ"]
+    courses = [
+        ("S1", "Программирование на Java", "Кафедра программирования", ["ПИ", "ИНТЭЛ"]),
+        ("S2", "Программирование на Python", "Кафедра программирования", ["КБ", "ПИ", "ИНТЭЛ"]),
+        ("S3", "Английский язык", "Кафедра иностранных языков", all_specialties),
+        ("S4", "Немецкий язык", "Кафедра иностранных языков", all_specialties),
+        ("S5", "Дискретная математика", "Кафедра математики", ["КБ", "ПИ", "ИНТЭЛ"]),
+        ("S6", "Базы данных", "Кафедра программирования", ["КБ", "ПИ", "ИНТЭЛ"]),
+        ("S7", "Численные методы", "Кафедра математики", ["ПИ", "РФ", "ИНТЭЛ"]),
+        ("S8", "Основы радиоэлектроники", "Кафедра радиотехники", ["РФ", "ИНТЭЛ", "КБ"]),
+        ("S9", "Математический анализ", "Кафедра математики", all_specialties),
+        ("S10", "ТВиМС", "Кафедра математики", ["ПИ", "РФ", "ИНТЭЛ"])
+    ]
+
+    for course_id, name, department, specialties in courses:
+        faculty.add_discipline(Discipline(
+            course_id, name, department,
+            {specialty: [1, 2, 3, 4, 5, 6, 7, 8] for specialty in specialties}
+        ))
+    faculty.save_registry()
+    return faculty
