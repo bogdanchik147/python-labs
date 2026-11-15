@@ -336,3 +336,133 @@ def My_faculty():
         ))
     faculty.save_registry()
     return faculty
+
+
+def show_disciplines(faculty, specialty=None, semester=None):
+    print("\nДоступные предметы:")
+    for discipline in faculty.disciplines.values():
+        if specialty and not discipline.is_available_for(specialty, semester):
+            continue
+        print(f"  {discipline.discipline_id} — {discipline.name} "
+              f"| кафедра: {discipline.department_name}")
+
+
+def show_students(faculty):
+    print("\nСписок студентов:")
+    if not faculty.students:
+        print("Студентов пока нет.")
+    for student in faculty.students.values():
+        print(f"{student.student_id} | {student.full_name} | "
+              f"{student.specialty} | семестр {student.semester}")
+    if faculty.expelled_students:
+        print("\nОтчисленные студенты:")
+        for record in faculty.expelled_students.values():
+            print(f"{record['student_id']} | {record['full_name']} | ОТЧИСЛЕН")
+
+
+def print_menu():
+    print("""
+==================================
+1. Зачислить студента
+2. Отчислить студента
+3. Записать студента на предмет
+4. Удалить студента с предмета
+5. Выставить оценку
+6. Перевести на следующий семестр
+7. Ведомость студента
+8. Ведомость предмета
+9. Показать студентов
+10. Показать предметы
+0. Выход
+===================================
+""")
+
+
+def main():
+    faculty = My_faculty()
+    print("Специальности:", ", ".join(faculty.specialties))
+
+    while True:
+        print_menu()
+        choice = input("Выберите действие: ").strip()
+
+        try:
+            if choice == "1":
+                student_id = input("ID студента: ").strip()
+                full_name = input("ФИО студента: ").strip()
+                print("Специальности:", ", ".join(faculty.specialties))
+                specialty = input("Специальность: ").strip().upper()
+                semester_text = input("Семестр (по умолчанию 1): ").strip()
+                semester = int(semester_text) if semester_text else 1
+                student = faculty.addtocourse_student(student_id, full_name, specialty, semester)
+                print(f"Студент {student.full_name} зачислен. Данные записаны в students_registry.txt")
+
+            elif choice in {"2", "3", "4", "5", "6", "7"}:
+                student_id = input("ID студента: ").strip()
+                student = faculty.get_student(student_id)
+
+                if choice == "2":
+                    faculty.expel_student(student_id)
+                    print("Студент отчислен. Запись сохранена")
+
+                elif choice == "3":
+                    show_disciplines(faculty, student.specialty, student.semester)
+                    discipline_id = input("ID предмета: ").strip().upper()
+                    faculty.add_student_to_discipline(student_id, discipline_id)
+                    print("Студент записан на предмет")
+
+                elif choice == "4":
+                    discipline_id = input("ID предмета: ").strip().upper()
+                    faculty.remove_student_from_discipline(student_id, discipline_id)
+                    print("Студент удален с предмета")
+
+                elif choice == "5":
+                    discipline_id = input("ID предмета: ").strip().upper()
+                    grade = int(input("Оценка (1–10): ").strip())
+                    expelled = faculty.set_student_grade(student_id, discipline_id, grade)
+                    if expelled:
+                        print("Оценка ниже 4. Студент автоматически ОТЧИСЛЕН")
+                    else:
+                        print("Оценка сохранена.")
+
+                elif choice == "6":
+                    faculty.move_to_next_semester(student_id)
+                    print(f"Студент переведен в {student.semester}-й семестр")
+
+                elif choice == "7":
+                    report, filename = faculty.student_report(student_id)
+                    print(report)
+                    print(f"\nВедомость сохранена в файл: {filename}")
+
+            elif choice == "8":
+                show_disciplines(faculty)
+                discipline_id = input("ID предмета: ").strip().upper()
+                report, filename = faculty.discipline_report(discipline_id)
+                print(report)
+                print(f"\nВедомость сохранена в файл: {filename}")
+
+            elif choice == "9":
+                show_students(faculty)
+
+            elif choice == "10":
+                show_disciplines(faculty)
+
+            elif choice == "0":
+                print("Работа программы завершена")
+                break
+
+            else:
+                print("Выберите пункт меню от 0 до 10")
+
+        except ValueError:
+            print("Ошибка: введите корректное числовое значение")
+        except FacultyError as error:
+            print("Ошибка:", error)
+        except OSError as error:
+            print("Ошибка при работе с файлом:", error)
+
+        input("\nНажмите Enter, чтобы продолжить...")
+
+
+if __name__ == "__main__":
+    main()
