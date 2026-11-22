@@ -1,0 +1,8 @@
+do add_task
+[v processe] уцц=======
+do add_task
+[v processe] уцц[v processe] фывф=======
+do complete_task
+[vypolnino] уцц[v processe] фывф=======
+do delete_task
+[vypolnino] уцц=======
